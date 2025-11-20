@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+// Fonction pour l'Extended Euclidean Algorithm
+int extendedEuclid(int a, int b, int *x, int *y) {
+    if (b == 0) {
+        *x = 1;
+        *y = 0;
+        return a;
+    } else {
+        int x1, y1;
+        int gcd = extendedEuclid(b, a % b, &x1, &y1);
+        *x = y1;
+        *y = x1 - (a / b) * y1;
+        return gcd;
+    }
+}
+
+int main() {
+    int a, b, c;
+    int a0, b0, r, operations = 0;
+    int x, y, xp, yp;
+    clock_t start, end;
+    double temps_execution;
+
+    const char* rose = "\033[1;35m";
+    const char* vert = "\033[1;32m";
+    const char* rouge = "\033[1;31m";
+    const char* reset = "\033[0m";
+
+    printf("%s🌸 Calculateur de PGCD avancé et équation linéaire 🌸%s\n\n", rose, reset);
+
+    // Entrée des nombres
+    printf("Entrez le premier nombre (a) : ");
+    scanf("%d", &a);
+    printf("Entrez le deuxième nombre (b) : ");
+    scanf("%d", &b);
+    printf("Entrez le nombre c pour l'équation a*x + b*y = c : ");
+    scanf("%d", &c);
+
+    a0 = a;
+    b0 = b;
+
+    start = clock();
+
+    // PGCD classique (Euclide)
+    int temp_a = a, temp_b = b;
+    while (temp_b != 0) {
+        r = temp_a % temp_b;
+        printf("%d = %d * (%d / %d) + %d\n", temp_a, temp_b, temp_a, temp_b, r);
+        temp_a = temp_b;
+        temp_b = r;
+        operations++;
+    }
+    int d = temp_a; // PGCD
+
+    // Extended Euclidean Algorithm
+    int gcd = extendedEuclid(a, b, &x, &y);
+
+    end = clock();
+    temps_execution = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+    printf("\n%sRésultat PGCD :%s %d\n", rose, reset, gcd);
+    printf("x et y qui vérifient a*x + b*y = PGCD(a,b) : x = %d, y = %d\n", x, y);
+
+    // Vérification existence solution pour a*x + b*y = c
+    if (c % gcd != 0) {
+        printf("%sPas de solution entière%s\n", rouge, reset);
+    } else {
+        printf("%sIl existe des solutions entières%s\n", vert, reset);
+        // Calcul solution particulière
+        int factor = c / gcd;
+        xp = x * factor;
+        yp = y * factor;
+        printf("Solution particulière : x = %d, y = %d\n", xp, yp);
+        printf("Forme générale : x = %d + (%d)*k, y = %d - (%d)*k, k ∈ Z\n", xp, b/gcd, yp, a/gcd);
+    }
+
+    printf("\n=== Statistiques ===\n");
+    printf("Nombre d'opérations PGCD : %d\n", operations);
+    printf("Temps d'exécution : %.6f secondes\n", temps_execution);
+    int memoire = sizeof(a)+sizeof(b)+sizeof(r)+sizeof(a0)+sizeof(b0)+sizeof(operations)+sizeof(start)+sizeof(end)+sizeof(temps_execution);
+    printf("Mémoire approximative utilisée : %d octets\n", memoire);
+    printf("\n%sMerci d'avoir utilisé le calculateur avancé 💗%s\n", rose, reset);
+
+    return 0;
+}
